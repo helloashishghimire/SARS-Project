@@ -10,12 +10,16 @@ namespace SmartAppointments.App.Data
         public DbSet<Staff> Staff => Set<Staff>();
         public DbSet<Appointment> Appointments => Set<Appointment>();
 
-        // PostgreSQL connection string -> change Username/Password if needed
+        // SQL Server connection string -> change Server/User/Password as needed
+        // Example for local SQL Server with SQL authentication:
+        //   Server=localhost;Database=SmartAppointmentsDb;User Id=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=True;
+        // Example for Windows authentication:
+        //   Server=localhost;Database=SmartAppointmentsDb;Trusted_Connection=True;TrustServerCertificate=True;
         private readonly string _cs =
-            "Host=localhost;Port=5432;Database=sms;Username=postgres;Password=12345";
+            "Server=localhost;Database=SmartAppointmentsDb;Trusted_Connection=True;TrustServerCertificate=True;";
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-            => optionsBuilder.UseNpgsql(_cs);
+            => optionsBuilder.UseSqlServer(_cs);
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -44,12 +48,7 @@ namespace SmartAppointments.App.Data
                 .HasForeignKey(a => a.StaffId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Simple “one appointment per day per customer per org” (soft check via index)
-            modelBuilder.Entity<Appointment>()
-                .HasIndex(a => new { a.OrganizationId, a.CustomerId, aStartDate = a.StartTime })
-                .HasDatabaseName("IX_Appt_OrgCustomer_Date");
-
-            // Seed demo data so UI has something to pick
+            // Seed data
             modelBuilder.Entity<Organization>().HasData(
                 new Organization { OrganizationId = 1, Name = "City DMV - Downtown", Location = "Main St" },
                 new Organization { OrganizationId = 2, Name = "General Hospital", Location = "North Wing" },

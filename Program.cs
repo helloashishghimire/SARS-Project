@@ -13,7 +13,7 @@ namespace SmartAppointments.App
             try
             {
                 ApplicationConfiguration.Initialize();
-                // This is where it usually fails if PostgreSQL is not reachable
+                // This is where it usually fails if the database is not reachable
                 DbInitializer.EnsureDatabase();
                 Application.Run(new MainForm());
             }
